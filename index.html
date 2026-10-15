@@ -1,0 +1,1205 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Nola</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:wght@400;600&family=Figtree:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;600&display=swap">
+<style>
+/* Layout: one centered column. Progress strip on top, tabs below, and a ruled index card as the stage. */
+:root{
+  --bg:#EDF0F5;
+  --surface:#FFFFFF;
+  --surface-2:#F4F6FA;
+  --fg:#16203A;
+  --muted:#586380;
+  --line:#D5DBE7;
+  --accent:#2848B8;
+  --accent-fg:#FFFFFF;
+  --accent-soft:#E3E9FB;
+  --rule-red:#D6455D;
+  --rule-blue:#D3DCF1;
+  --lv0:#A3ADC4;
+  --lv1:#D9822B;
+  --lv2:#1C93A3;
+  --lv3:#2A9858;
+  --good:#1F7A47;
+  --good-soft:#E3F3E9;
+  --bad:#B93434;
+  --bad-soft:#FBE8E8;
+  --font-ui:'Figtree',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --font-card:'Bitter','Noto Serif SC',Georgia,'Songti SC','Noto Serif CJK SC','Hiragino Mincho ProN',serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1424;--surface:#182038;--surface-2:#1F2848;--fg:#E8ECF8;--muted:#9BA7C6;--line:#2C3659;
+    --accent:#86A0FF;--accent-fg:#0F1424;--accent-soft:#242F5A;--rule-red:#FF6B82;--rule-blue:#28335E;
+    --lv0:#6F7A9C;--lv1:#F0A24F;--lv2:#3FC1D0;--lv3:#4CC27F;
+    --good:#5AD38C;--good-soft:#1B3A2B;--bad:#FF8585;--bad-soft:#47232B;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1424;--surface:#182038;--surface-2:#1F2848;--fg:#E8ECF8;--muted:#9BA7C6;--line:#2C3659;
+  --accent:#86A0FF;--accent-fg:#0F1424;--accent-soft:#242F5A;--rule-red:#FF6B82;--rule-blue:#28335E;
+  --lv0:#6F7A9C;--lv1:#F0A24F;--lv2:#3FC1D0;--lv3:#4CC27F;
+  --good:#5AD38C;--good-soft:#1B3A2B;--bad:#FF8585;--bad-soft:#47232B;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{
+  background:var(--bg);color:var(--fg);
+  font:400 1rem/1.5 var(--font-ui);
+  padding-block:20px 72px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3,p,ul{margin:0}
+ul{padding:0;list-style:none}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.muted{color:var(--muted)}
+
+.shell{max-width:44rem;margin:0 auto;display:flex;flex-direction:column;gap:1.25rem;min-width:0}
+
+/* header */
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.75rem}
+.brand{font:600 1.5rem/1.2 var(--font-card);letter-spacing:-.01em}
+.deckbar{display:flex;gap:.5rem;align-items:center;min-width:0;max-width:100%}
+select,input[type=text],input[type=password],textarea{
+  background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:.55rem .75rem;min-width:0;max-width:100%;
+}
+select{cursor:pointer}
+textarea{width:100%;resize:vertical;min-height:7rem;line-height:1.5}
+input[type=text],input[type=password]{width:100%}
+input[type=checkbox]{width:1.1rem;height:1.1rem;accent-color:var(--accent)}
+.deckbar select{max-width:min(16rem,52vw)}
+
+/* buttons */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+  border:1px solid var(--line);background:var(--surface);color:var(--fg);
+  padding:.55rem .95rem;border-radius:8px;font-weight:600;font-size:.9rem;cursor:pointer;
+}
+.btn:hover:not(:disabled){background:var(--surface-2)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.btn.primary:hover:not(:disabled){filter:brightness(1.08);background:var(--accent)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--muted)}
+.btn.ghost:hover:not(:disabled){background:var(--surface-2);color:var(--fg)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.danger.solid{background:var(--bad);color:var(--surface);border-color:var(--bad)}
+.btn.small{padding:.3rem .65rem;font-size:.8rem}
+.btn.big{padding:.8rem 1.2rem;font-size:1rem}
+.btn.again{border-color:var(--lv1);color:var(--fg)}
+.btn.again:hover:not(:disabled){background:var(--surface-2)}
+.btn.wide{width:100%}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:1.1rem}
+
+/* progress */
+.progress{display:flex;flex-direction:column;gap:.8rem}
+.prog-top{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:.25rem .75rem}
+.prog-main{display:flex;align-items:baseline;gap:.5rem;min-width:0}
+.prog-pct{font:600 2rem/1 var(--font-card);font-variant-numeric:tabular-nums}
+.prog-cap{color:var(--muted);font-size:.9rem}
+.prog-last{color:var(--muted);font-size:.85rem;font-variant-numeric:tabular-nums}
+.bar{display:flex;height:.7rem;border-radius:99px;overflow:hidden;background:var(--surface-2);border:1px solid var(--line)}
+.bar span{display:block;height:100%}
+.seg-0{background:var(--lv0)}.seg-1{background:var(--lv1)}.seg-2{background:var(--lv2)}.seg-3{background:var(--lv3)}
+.legend{display:flex;flex-wrap:wrap;gap:.35rem 1.1rem;font-size:.85rem;color:var(--muted)}
+.legend li{display:flex;align-items:center;gap:.4rem}
+.legend b{color:var(--fg);font-variant-numeric:tabular-nums}
+.dot{width:.65rem;height:.65rem;border-radius:2px;background:var(--c,var(--lv0));flex:none}
+
+/* tabs */
+.tabs{display:flex;gap:.25rem;border-bottom:1px solid var(--line)}
+.tab{
+  flex:1;background:none;border:0;border-bottom:3px solid transparent;margin-bottom:-1px;
+  padding:.7rem .5rem;font-weight:600;color:var(--muted);cursor:pointer;
+}
+.tab:hover{color:var(--fg)}
+.tab[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
+
+/* views */
+.view{display:flex;flex-direction:column;gap:1rem;min-width:0}
+.start{display:flex;flex-direction:column;gap:1rem}
+.start h2,.results h2{font:600 1.25rem/1.3 var(--font-card)}
+.lead{color:var(--muted)}
+.opts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(11rem,1fr));gap:.9rem}
+.field{display:flex;flex-direction:column;gap:.3rem;min-width:0}
+.field>span,.label{font-size:.78rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.check{display:flex;align-items:center;gap:.6rem;cursor:pointer}
+.recent{display:flex;flex-direction:column;gap:.25rem;font-size:.9rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.recent h3{font-size:.78rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:.15rem}
+.empty{display:flex;flex-direction:column;align-items:flex-start;gap:.75rem;padding:1.5rem 0}
+.empty h2{font:600 1.25rem var(--font-card)}
+
+.session-head{display:flex;align-items:center;justify-content:space-between;gap:.75rem;font-size:.9rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.minibar{height:.3rem;background:var(--line);border-radius:99px;overflow:hidden}
+.minibar span{display:block;height:100%;background:var(--accent);transition:width .3s}
+
+/* index card */
+.flip{perspective:1400px;width:100%;cursor:pointer;border-radius:12px;-webkit-tap-highlight-color:transparent}
+.flip-inner{display:grid;transition:transform .5s cubic-bezier(.3,.7,.2,1);transform-style:preserve-3d}
+.flip.flipped .flip-inner{transform:rotateY(180deg)}
+.face{
+  grid-area:1/1;position:relative;overflow:hidden;
+  background:var(--surface);border:1px solid var(--line);border-radius:12px;
+  min-height:17rem;display:flex;flex-direction:column;
+  backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  box-shadow:0 1px 0 var(--line),0 10px 24px -18px rgba(22,32,58,.45);
+}
+.face.back{transform:rotateY(180deg)}
+.face.solo{min-height:12rem}
+.face::before{content:"";position:absolute;left:0;right:0;top:3rem;bottom:0;
+  background:repeating-linear-gradient(to bottom,transparent 0,transparent calc(2rem - 1px),var(--rule-blue) calc(2rem - 1px),var(--rule-blue) 2rem);
+}
+.face::after{content:"";position:absolute;left:0;right:0;top:3rem;height:2px;background:var(--rule-red)}
+.face-head{position:relative;z-index:1;height:3rem;display:flex;align-items:center;justify-content:space-between;padding:0 1.1rem}
+.eyebrow{font-size:.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.face-body{
+  position:relative;z-index:1;flex:1;display:flex;flex-direction:column;gap:.7rem;align-items:center;justify-content:center;text-align:center;
+  padding:1.5rem 1.4rem 1.7rem;font-family:var(--font-card);font-weight:600;
+  font-size:clamp(1.7rem,7vw,2.6rem);line-height:1.25;overflow-wrap:anywhere;text-wrap:balance;
+}
+.face-body.s1{font-size:clamp(1.4rem,5.5vw,2rem)}
+.face-body.s2{font-size:clamp(1.15rem,4.4vw,1.5rem);font-weight:400}
+.face-body.s3{font-size:1.05rem;font-weight:400}
+.hint{font-size:.82rem;color:var(--muted);text-align:center}
+.face-sub{font:400 1.05rem/1.3 var(--font-ui);color:var(--muted)}
+.py{display:block;font:400 .85rem/1.3 var(--font-ui);color:var(--muted)}
+.account{font-size:.85rem;color:var(--muted);display:flex;flex-wrap:wrap;align-items:center;gap:.25rem .5rem}
+.account b{color:var(--fg)}
+.brandwrap{display:flex;flex-direction:column;gap:.1rem;min-width:0}
+.tagline{font-size:.8rem;letter-spacing:.06em;color:var(--muted)}
+.auth{max-width:26rem;margin:6vh auto 0;display:flex;flex-direction:column;gap:1.25rem}
+.auth .brand{font-size:2.6rem}
+.auth-card{display:flex;flex-direction:column;gap:1.1rem}
+.auth-card .add-form{gap:.9rem}
+.err{color:var(--bad);font-size:.9rem;min-height:1.35em}
+.pwform{display:grid;gap:.7rem;max-width:22rem}
+kbd{font:600 .75rem var(--font-ui);padding:.05rem .4rem;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;background:var(--surface)}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.actions .only{grid-column:1/-1}
+
+/* test */
+.answer-form{display:flex;flex-direction:column;gap:.7rem}
+.answer-input{font-size:1.15rem;padding:.8rem 1rem;border-radius:10px}
+.row-btns{display:flex;flex-wrap:wrap;gap:.6rem}
+.feedback{display:flex;flex-direction:column;gap:.35rem;padding:.9rem 1rem;border-radius:10px;border:1px solid var(--line);background:var(--surface)}
+.feedback.ok{border-color:var(--good);background:var(--good-soft)}
+.feedback.bad{border-color:var(--bad);background:var(--bad-soft)}
+.fb-title{font-weight:700}
+.feedback.ok .fb-title{color:var(--good)}
+.feedback.bad .fb-title{color:var(--bad)}
+.ans{font-family:var(--font-card);font-weight:600;overflow-wrap:anywhere}
+.opts{display:grid;gap:.5rem}
+.opt{
+  display:flex;gap:.75rem;align-items:center;text-align:left;width:100%;min-width:0;
+  padding:.8rem 1rem;border:1px solid var(--line);background:var(--surface);border-radius:10px;
+  color:var(--fg);font-weight:500;cursor:pointer;overflow-wrap:anywhere;
+}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt:disabled{cursor:default;color:var(--fg);opacity:1}
+.opt .k{flex:none;width:1.5rem;height:1.5rem;display:grid;place-items:center;border-radius:5px;background:var(--surface-2);font-size:.75rem;font-weight:700;color:var(--muted)}
+.opt.right{border-color:var(--good);background:var(--good-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+
+.results{display:flex;flex-direction:column;gap:1rem}
+.score{font:600 3rem/1 var(--font-card);font-variant-numeric:tabular-nums}
+.score small{font-size:1.25rem;color:var(--muted);font-weight:400}
+.missed{display:flex;flex-direction:column}
+.missed li{padding:.6rem 0;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:.1rem;min-width:0;overflow-wrap:anywhere}
+.missed li:first-child{border-top:1px solid var(--line)}
+.missed .p{font-weight:600}
+.missed .g{font-size:.85rem;color:var(--muted)}
+
+/* cards view */
+.add-grid{display:grid;grid-template-columns:1fr 1fr 1.3fr;gap:.75rem}
+.add-form{display:flex;flex-direction:column;gap:.9rem}
+details.bulk{border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+details.bulk summary{padding:.85rem 1.1rem;font-weight:600;cursor:pointer}
+.bulk-body{padding:0 1.1rem 1.1rem;display:flex;flex-direction:column;gap:.75rem}
+.bulk-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.6rem}
+.list-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.6rem}
+.list-head h2{font:600 1.1rem var(--font-card)}
+.list-head input{max-width:14rem}
+.rows{display:flex;flex-direction:column}
+.row{
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto auto;gap:.4rem .9rem;align-items:center;
+  padding:.7rem 0;border-bottom:1px solid var(--line);
+}
+.row:first-child{border-top:1px solid var(--line)}
+.cell-t{font-family:var(--font-card);font-weight:600;overflow-wrap:anywhere}
+.cell-d{overflow-wrap:anywhere;color:var(--muted)}
+.pill{display:inline-flex;align-items:center;gap:.4rem;font-size:.75rem;font-weight:600;color:var(--muted);white-space:nowrap}
+.pill::before{content:"";width:.6rem;height:.6rem;border-radius:2px;background:var(--c)}
+.pill[data-lv="0"]{--c:var(--lv0)}.pill[data-lv="1"]{--c:var(--lv1)}.pill[data-lv="2"]{--c:var(--lv2)}.pill[data-lv="3"]{--c:var(--lv3)}
+.row-actions{display:flex;gap:.25rem}
+.row.editing{grid-template-columns:1fr 1fr;}
+.row.editing form{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr 1.3fr;gap:.6rem}
+.row.editing .row-btns{grid-column:1/-1}
+.row.confirm{grid-template-columns:minmax(0,1fr) auto}
+.more{padding:.75rem 0;font-size:.85rem;color:var(--muted)}
+.admin{display:flex;flex-direction:column;gap:1rem}
+.admin h2{font:600 1.1rem var(--font-card)}
+.rename{display:flex;gap:.5rem;flex-wrap:wrap}
+.rename input{flex:1;min-width:10rem}
+.note{padding:.8rem 1rem;border-radius:10px;background:var(--accent-soft);font-size:.9rem}
+.confirmbar{display:flex;flex-direction:column;gap:.6rem;padding:.9rem 1rem;border:1px solid var(--bad);border-radius:10px;background:var(--bad-soft)}
+
+.status{font-size:.8rem;color:var(--muted);text-align:center}
+
+.toast-wrap{
+  position:fixed;left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));
+  bottom:calc(16px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;pointer-events:none;
+}
+.toast{background:var(--fg);color:var(--bg);padding:.6rem 1rem;border-radius:99px;font-size:.9rem;font-weight:500;opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s;max-width:100%}
+.toast.on{opacity:1;transform:none}
+
+@media (max-width:600px){
+  .add-grid{grid-template-columns:1fr}
+  .row{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"t t" "d d" "p a"}
+  .row .cell-t{grid-area:t}.row .cell-d{grid-area:d}.row .pill{grid-area:p}.row .row-actions{grid-area:a}
+  .row.editing form{grid-template-columns:1fr}
+  .prog-pct{font-size:1.7rem}
+}
+@media (prefers-reduced-motion: reduce){
+  .flip-inner,.minibar span,.toast{transition:none}
+}
+</style>
+
+<div class="auth" id="auth">
+  <div class="brandwrap">
+    <h1 class="brand">Nola</h1>
+    <p class="tagline">no language barriers</p>
+  </div>
+  <div class="panel auth-card">
+    <div class="tabs" role="tablist" aria-label="Account">
+      <button class="tab" type="button" role="tab" id="atab-login" data-act="authLogin" aria-selected="true">Log in</button>
+      <button class="tab" type="button" role="tab" id="atab-signup" data-act="authSignup" aria-selected="false">Create account</button>
+    </div>
+    <form id="authForm" class="add-form" novalidate>
+      <label class="field"><span>Username</span><input type="text" id="authUser" autocomplete="username" autocapitalize="off" spellcheck="false" maxlength="40"></label>
+      <label class="field"><span>Password</span><input type="password" id="authPass" autocomplete="current-password"></label>
+      <label class="field" id="authPass2Field" hidden><span>Repeat password</span><input type="password" id="authPass2" autocomplete="new-password"></label>
+      <label class="check"><input type="checkbox" id="authKeep"> Keep me signed in on this device</label>
+      <p class="note" id="authNote" hidden>Your decks are encrypted with your password. There is no password reset, so if you forget it your cards cannot be recovered.</p>
+      <p class="err" id="authErr" role="alert"></p>
+      <button class="btn primary big wide" type="submit" id="authSubmit" disabled>Log in</button>
+    </form>
+  </div>
+  <p class="status" id="authStatus" role="status">Connecting…</p>
+</div>
+
+<div class="shell" id="app" hidden>
+  <header class="top">
+    <div class="brandwrap">
+      <h1 class="brand">Nola</h1>
+      <p class="tagline">no language barriers</p>
+    </div>
+    <div class="deckbar">
+      <label class="sr" for="deckSelect">Deck</label>
+      <select id="deckSelect"></select>
+      <button class="btn" type="button" data-act="newDeck">New deck</button>
+    </div>
+  </header>
+
+  <form id="newDeckForm" class="panel add-form" hidden>
+    <label class="field"><span>Deck name</span><input type="text" id="newDeckName" maxlength="60" autocomplete="off" placeholder="e.g. German travel words"></label>
+    <div class="row-btns">
+      <button class="btn primary" type="submit">Create deck</button>
+      <button class="btn ghost" type="button" data-act="cancelNewDeck">Cancel</button>
+    </div>
+  </form>
+
+  <p class="account" id="account"></p>
+
+  <section class="panel progress" aria-label="Deck progress" id="progress"></section>
+
+  <nav class="tabs" role="tablist" aria-label="Sections">
+    <button class="tab" role="tab" id="tab-study" data-tab="study" aria-selected="true" aria-controls="view-study">Study</button>
+    <button class="tab" role="tab" id="tab-test" data-tab="test" aria-selected="false" aria-controls="view-test">Test</button>
+    <button class="tab" role="tab" id="tab-cards" data-tab="cards" aria-selected="false" aria-controls="view-cards">Cards</button>
+  </nav>
+
+  <main>
+    <section class="view" id="view-study" role="tabpanel" aria-labelledby="tab-study"><div id="studyBody"></div></section>
+    <section class="view" id="view-test" role="tabpanel" aria-labelledby="tab-test" hidden><div id="testBody"></div></section>
+    <section class="view" id="view-cards" role="tabpanel" aria-labelledby="tab-cards" hidden>
+      <div id="sampleNote"></div>
+      <form class="panel add-form" id="addForm">
+        <div class="add-grid">
+          <label class="field"><span>Chinese</span><input type="text" id="addTerm" lang="zh-Hans" autocomplete="off" placeholder="e.g. 窗户"></label>
+          <label class="field"><span>Pinyin</span><input type="text" id="addPy" autocomplete="off" autocapitalize="off" placeholder="e.g. chuang1hu or chuānghu"></label>
+          <label class="field"><span>Meaning</span><input type="text" id="addDef" autocomplete="off" placeholder="e.g. window"></label>
+        </div>
+        <div class="row-btns"><button class="btn primary" type="submit">Add card</button></div>
+      </form>
+      <details class="bulk" id="bulkBox">
+        <summary>Paste many cards at once</summary>
+        <div class="bulk-body">
+          <p class="muted">One card per line: Chinese ; pinyin ; meaning. Pinyin is optional, so Chinese ; meaning works too. Separate fields with a semicolon, equals sign, tab or spaced dash. Pasting columns from a spreadsheet works. Tone numbers such as ni3 hao3 are turned into tone marks.</p>
+          <label class="sr" for="bulkText">Cards to import</label>
+          <textarea id="bulkText" placeholder="你好 ; nǐ hǎo ; hello&#10;谢谢 ; xie4xie ; thank you&#10;书 ; book"></textarea>
+          <div class="bulk-foot">
+            <span class="muted" id="bulkPreview">Nothing to import yet.</span>
+            <button class="btn primary" type="button" id="bulkBtn" data-act="importBulk" disabled>Add cards</button>
+          </div>
+        </div>
+      </details>
+      <div class="list-head">
+        <h2 id="listTitle">Cards</h2>
+        <label class="sr" for="cardSearch">Search cards</label>
+        <input type="text" id="cardSearch" placeholder="Search this deck" autocomplete="off">
+      </div>
+      <ul class="rows" id="cardList"></ul>
+      <div class="panel admin" id="deckAdmin"></div>
+      <div class="panel admin" id="acctAdmin"></div>
+    </section>
+  </main>
+
+  <p class="status" id="status" role="status"></p>
+</div>
+<div class="toast-wrap"><div class="toast" id="toast" role="status" aria-live="polite"></div></div>
+
+<script>
+(function(){
+'use strict';
+
+/* ---------- helpers ---------- */
+var $=function(s,r){return (r||document).querySelector(s)};
+var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function uid(){return Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-3)}
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+function pl(n,w){return n+' '+w+(n===1?'':'s')}
+function fmtDate(ts){try{return new Date(ts).toLocaleDateString(undefined,{day:'numeric',month:'short'})}catch(e){return ''}}
+function focusSoon(el){requestAnimationFrame(function(){if(el)el.focus({preventScroll:true})})}
+function lenClass(t){var n=String(t).length;return n>100?'s3':n>50?'s2':n>24?'s1':''}
+
+var LV=['New','Learning','Familiar','Mastered'];
+var LS_KEY='wordbox.v1';
+
+/* ---------- state ---------- */
+function sampleDeck(){
+  var raw=[['你好','nǐ hǎo','hello',3],['谢谢','xièxie','thank you',3],['请','qǐng','please',3],['早上好','zǎoshang hǎo','good morning',2],['你好吗？','nǐ hǎo ma?','how are you?',2],['书','shū','book',2],['窗户','chuānghu','window',1],['说','shuō','to speak',1],['吃','chī','to eat',1],['明天','míngtiān','tomorrow',0],['总是','zǒngshì','always',0],['学习','xuéxí','to study / to learn',0]];
+  return {id:uid(),name:'Chinese basics (example)',sample:true,
+    cards:raw.map(function(r){return {id:uid(),t:r[0],p:r[1],d:r[2],lv:r[3],seen:r[3]?1:0,ok:r[3]?1:0,no:0,last:0}}),tests:[]};
+}
+function defaults(){return {dir:'tf',inclMastered:false,showPinyin:true,studyN:20,testN:10,testMode:'type'}}
+function freshState(){var d=sampleDeck();return {v:1,updatedAt:0,activeId:d.id,settings:defaults(),decks:[d]}}
+function normalizeState(s){
+  var out={v:1,updatedAt:+s.updatedAt||0,settings:Object.assign(defaults(),s.settings||{}),decks:[]};
+  (s.decks||[]).forEach(function(d){
+    if(!d||!d.id)return;
+    if(d.sample&&/spanish/i.test(String(d.name))){var sd=sampleDeck();sd.id=String(d.id);out.decks.push(sd);return}
+    out.decks.push({id:String(d.id),name:String(d.name||'Untitled deck'),sample:!!d.sample,
+      cards:(d.cards||[]).filter(function(c){return c&&c.t!=null&&c.d!=null}).map(function(c){
+        return {id:String(c.id||uid()),t:String(c.t),p:String(c.p||''),d:String(c.d),lv:Math.min(3,Math.max(0,+c.lv||0)),seen:+c.seen||0,ok:+c.ok||0,no:+c.no||0,last:+c.last||0}}),
+      tests:Array.isArray(d.tests)?d.tests.slice(-20):[]});
+  });
+  if(!out.decks.length)out.decks.push({id:uid(),name:'My words',cards:[],tests:[]});
+  out.activeId=out.decks.some(function(d){return d.id===s.activeId})?s.activeId:out.decks[0].id;
+  return out;
+}
+function loadLocal(){
+  try{var raw=localStorage.getItem(LS_KEY);if(!raw)return null;var s=JSON.parse(raw);if(s&&Array.isArray(s.decks))return normalizeState(s)}catch(e){}
+  return null;
+}
+var legacy=loadLocal();
+var state=freshState();
+var tab='study';
+var study=null,test=null;
+var editing=null,confirmCard=null,confirmAdmin=null,cardFilter='';
+
+function deck(){return state.decks.find(function(d){return d.id===state.activeId})||state.decks[0]}
+function cardById(id){return deck().cards.find(function(c){return c.id===id})}
+function resetSessions(){study=null;test=null;editing=null;confirmCard=null;confirmAdmin=null}
+
+/* ---------- accounts, encryption and saving ---------- */
+/* An account is one document: { salt, iter, iv, ct, updatedAt }. The username is hashed to make the
+   document id, and the whole deck state is AES-GCM encrypted with a key derived from the password
+   (PBKDF2), so the stored data is unreadable without it. */
+var session=null;
+var db=null,authReady=false,authMode='login',acctDel=false;
+var saveTimer=null,saving=false,dirty=false;
+var ITER=310000;
+var enc=new TextEncoder(),dec=new TextDecoder();
+
+function setStatus(t){var el=$('#status');if(el)el.textContent=t}
+function fail(m){var e=new Error(m);e.friendly=true;return e}
+function b64(buf){var b=new Uint8Array(buf),s='';for(var i=0;i<b.length;i++)s+=String.fromCharCode(b[i]);return btoa(s)}
+function unb64(s){var bin=atob(s),b=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)b[i]=bin.charCodeAt(i);return b}
+function cleanName(u){return String(u||'').trim().normalize('NFKC').toLowerCase()}
+function userId(u){
+  return crypto.subtle.digest('SHA-256',enc.encode('nola:'+cleanName(u))).then(function(h){
+    return Array.prototype.map.call(new Uint8Array(h),function(x){return ('0'+x.toString(16)).slice(-2)}).join('');
+  });
+}
+function deriveKey(pw,salt,iter){
+  return crypto.subtle.importKey('raw',enc.encode(pw),'PBKDF2',false,['deriveKey']).then(function(base){
+    return crypto.subtle.deriveKey({name:'PBKDF2',salt:salt,iterations:iter,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+  });
+}
+function encryptState(key,obj){
+  var iv=crypto.getRandomValues(new Uint8Array(12));
+  return crypto.subtle.encrypt({name:'AES-GCM',iv:iv},key,enc.encode(JSON.stringify(obj))).then(function(ct){return {iv:b64(iv),ct:b64(ct)}});
+}
+function decryptState(key,doc){
+  return crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(doc.iv)},key,unb64(doc.ct)).then(function(pt){return JSON.parse(dec.decode(pt))});
+}
+
+/* storage: the shared database when this view has it, plus an encrypted copy in this browser */
+function lsKey(id){return 'nola.acct.'+id}
+function readLocalDoc(id){try{var r=localStorage.getItem(lsKey(id));return r?JSON.parse(r):null}catch(e){return null}}
+function writeLocalDoc(id,doc){try{localStorage.setItem(lsKey(id),JSON.stringify(doc))}catch(e){}}
+function readDoc(id,remoteOnly){
+  var local=readLocalDoc(id);
+  if(!db)return Promise.resolve({doc:local,syncUp:false});
+  return db.doc('accounts/'+id).get().then(function(snap){
+    var remote=snap.exists?snap.data():null;
+    if(remoteOnly)return {doc:remote,syncUp:false};
+    if(remote&&local&&(+local.updatedAt||0)>(+remote.updatedAt||0))return {doc:local,syncUp:true};
+    return {doc:remote||local,syncUp:!remote&&!!local};
+  },function(){return {doc:local,syncUp:false}});
+}
+
+/* keep-me-signed-in: the non-extractable key is held in this browser's IndexedDB, never the password */
+function idb(){
+  return new Promise(function(res,rej){
+    try{
+      var r=indexedDB.open('nola-auth',1);
+      r.onupgradeneeded=function(){r.result.createObjectStore('s')};
+      r.onsuccess=function(){res(r.result)};
+      r.onerror=function(){rej(r.error)};
+    }catch(e){rej(e)}
+  });
+}
+function idbDo(mode,fn){
+  return idb().then(function(d){
+    return new Promise(function(res,rej){
+      var tx=d.transaction('s',mode),req=fn(tx.objectStore('s'));
+      tx.oncomplete=function(){res(req&&req.result)};
+      tx.onerror=function(){rej(tx.error)};
+      tx.onabort=function(){rej(tx.error)};
+    });
+  });
+}
+function remember(s){return idbDo('readwrite',function(st){return st.put({id:s.id,name:s.name,key:s.key,salt:s.salt,iter:s.iter},'session')})}
+function recall(){return idbDo('readonly',function(st){return st.get('session')})}
+function forget(){return idbDo('readwrite',function(st){return st.delete('session')}).catch(function(){})}
+
+/* saving */
+function persist(){
+  if(!session)return;
+  state.updatedAt=Date.now();
+  dirty=true;setStatus('Saving…');
+  clearTimeout(saveTimer);saveTimer=setTimeout(flush,700);
+}
+function flush(){
+  if(!session||saving||!dirty)return Promise.resolve();
+  saving=true;dirty=false;
+  var s=session,snap=JSON.parse(JSON.stringify(state)),at=state.updatedAt||Date.now();
+  return encryptState(s.key,{name:s.name,state:snap}).then(function(e){
+    var doc={v:1,salt:s.salt,iter:s.iter,iv:e.iv,ct:e.ct,updatedAt:at};
+    s.doc=doc;
+    writeLocalDoc(s.id,doc);
+    if(!db){setStatus('Saved in this browser');return}
+    return db.doc('accounts/'+s.id).set(doc).then(function(){
+      setStatus('Saved to your account');
+    },function(err){
+      setStatus(err&&err.code==='quota_exceeded'?'Account storage is full. Saved in this browser only.':'Could not reach your account. Saved in this browser.');
+    });
+  }).catch(function(){setStatus('Could not save. Try again.')}).then(function(){saving=false;if(dirty)flush()});
+}
+function whenIdle(){return new Promise(function(res){(function w(){if(!saving&&!dirty)res();else setTimeout(w,50)})()})}
+
+/* auth screen */
+function setAuthMode(m){
+  authMode=m;var su=m==='signup';
+  $('#atab-login').setAttribute('aria-selected',su?'false':'true');
+  $('#atab-signup').setAttribute('aria-selected',su?'true':'false');
+  $('#authPass2Field').hidden=!su;
+  $('#authNote').hidden=!su;
+  $('#authSubmit').textContent=su?'Create account':'Log in';
+  $('#authPass').setAttribute('autocomplete',su?'new-password':'current-password');
+  $('#authErr').textContent='';
+}
+function setAuthErr(m){$('#authErr').textContent=m||''}
+function busy(b){
+  var btn=$('#authSubmit');btn.disabled=b||!authReady;
+  btn.textContent=b?'Working…':(authMode==='signup'?'Create account':'Log in');
+}
+function authSubmit(){
+  if(!authReady)return;
+  var u=$('#authUser').value.trim(),p=$('#authPass').value;
+  setAuthErr('');
+  if(!window.crypto||!crypto.subtle){setAuthErr('This browser cannot do secure sign-in. Try a current version of Chrome, Safari, Firefox or Edge.');return}
+  if(authMode==='signup'){
+    if(u.length<3||u.length>40){setAuthErr('Pick a username with 3 to 40 characters.');focusSoon($('#authUser'));return}
+    if(p.length<8){setAuthErr('Use a password with at least 8 characters.');focusSoon($('#authPass'));return}
+    if(p!==$('#authPass2').value){setAuthErr('The two passwords do not match.');focusSoon($('#authPass2'));return}
+  }else if(!u||!p){setAuthErr('Enter your username and password.');return}
+  busy(true);
+  (authMode==='signup'?signUp(u,p):logIn(u,p)).then(function(res){
+    busy(false);
+    enterSession(res,$('#authKeep').checked);
+    if(res.imported){
+      legacy=null;try{localStorage.removeItem(LS_KEY)}catch(e){}
+      toast('Your earlier cards from this browser were moved into your account.');
+    }
+  },function(e){
+    busy(false);
+    setAuthErr(e&&e.friendly?e.message:'Something went wrong. Try again.');
+  });
+}
+function signUp(u,p){
+  var id,name=u.trim();
+  return userId(u).then(function(i){id=i;return readDoc(id,true)}).then(function(r){
+    if(r.doc)throw fail('That username is already taken.');
+    var salt=crypto.getRandomValues(new Uint8Array(16));
+    return deriveKey(p,salt,ITER).then(function(key){
+      var st=legacy?normalizeState(legacy):freshState();
+      var s={id:id,name:name,key:key,salt:b64(salt),iter:ITER,doc:null};
+      return encryptState(key,{name:name,state:st}).then(function(e){
+        var at=Date.now(),doc={v:1,salt:s.salt,iter:ITER,iv:e.iv,ct:e.ct,updatedAt:at};
+        st.updatedAt=at;
+        var w=db?db.doc('accounts/'+id).set(doc):Promise.resolve();
+        return w.then(function(){
+          s.doc=doc;writeLocalDoc(id,doc);
+          return {s:s,st:st,syncUp:false,imported:!!legacy};
+        },function(err){
+          throw fail(err&&err.code==='invalid_argument'?'Your access level on this page does not allow creating accounts.':'Could not save the account. Try again.');
+        });
+      });
+    });
+  });
+}
+function logIn(u,p){
+  var id,bad=function(){return fail('Username or password is wrong.')};
+  return userId(u).then(function(i){id=i;return readDoc(id,false)}).then(function(r){
+    var doc=r.doc;if(!doc||!doc.salt||!doc.iv||!doc.ct)throw bad();
+    var iter=+doc.iter||ITER;
+    return deriveKey(p,unb64(doc.salt),iter).then(function(key){
+      return decryptState(key,doc).then(function(pl){
+        return {s:{id:id,name:(pl&&pl.name)||u.trim(),key:key,salt:doc.salt,iter:iter,doc:doc},st:normalizeState(pl.state),syncUp:r.syncUp,imported:false};
+      },function(){throw bad()});
+    });
+  });
+}
+function enterSession(res,keep){
+  session=res.s;state=res.st;dirty=false;
+  resetSessions();cardFilter='';acctDel=false;
+  if(keep)remember(session).catch(function(){});else forget();
+  $('#authPass').value='';$('#authPass2').value='';
+  $('#auth').hidden=true;$('#app').hidden=false;
+  renderAll();renderAccount();setTab('study');
+  setStatus(db?'Saved to your account':'Saved in this browser');
+  if(res.syncUp){dirty=true;flush()}
+  window.scrollTo(0,0);
+}
+function closeSession(){
+  forget();
+  session=null;dirty=false;state=freshState();resetSessions();acctDel=false;
+  $('#app').hidden=true;$('#auth').hidden=false;
+  $('#authUser').value='';$('#authPass').value='';$('#authPass2').value='';$('#authKeep').checked=false;
+  setAuthMode('login');focusSoon($('#authUser'));
+  window.scrollTo(0,0);
+}
+function logOut(){
+  clearTimeout(saveTimer);
+  if(dirty)flush();
+  whenIdle().then(closeSession);
+}
+function renderAccount(){
+  var el=$('#account');if(!el||!session)return;
+  el.innerHTML='Signed in as <b>'+esc(session.name)+'</b> <button class="btn ghost small" type="button" data-act="logout">Log out</button>';
+}
+function verifyPw(pw){
+  return deriveKey(pw,unb64(session.salt),session.iter).then(function(k){return decryptState(k,session.doc)});
+}
+function changePassword(){
+  var cur=$('#pwCur').value,nw=$('#pwNew').value,n2=$('#pwNew2').value;
+  if(!cur||!nw||!n2){toast('Fill in all three password fields.');return}
+  if(nw.length<8){toast('Use a new password with at least 8 characters.');return}
+  if(nw!==n2){toast('The new passwords do not match.');return}
+  verifyPw(cur).then(null,function(){throw fail('Your current password is wrong.')}).then(function(){
+    var salt=crypto.getRandomValues(new Uint8Array(16));
+    return deriveKey(nw,salt,ITER).then(function(key){
+      session.key=key;session.salt=b64(salt);session.iter=ITER;
+      state.updatedAt=Date.now();dirty=true;
+      return flush().then(whenIdle);
+    });
+  }).then(function(){
+    toast('Password changed');renderAcctAdmin();
+    recall().then(function(r){if(r)return remember(session)}).catch(function(){});
+  },function(e){toast(e&&e.friendly?e.message:'Could not change the password. Try again.')});
+}
+function deleteAccount(){
+  var pw=$('#delPw').value;
+  if(!pw){toast('Enter your password to confirm.');return}
+  verifyPw(pw).then(null,function(){throw fail('That password is wrong.')}).then(function(){
+    clearTimeout(saveTimer);dirty=false;
+    return whenIdle();
+  }).then(function(){
+    var id=session.id;
+    try{localStorage.removeItem(lsKey(id))}catch(e){}
+    return db?db.doc('accounts/'+id).delete():null;
+  }).then(function(){closeSession();toast('Account deleted')},
+    function(e){toast(e&&e.friendly?e.message:'Could not delete the account. Try again.')});
+}
+function renderAcctAdmin(){
+  var el=$('#acctAdmin');if(!el||!session)return;
+  var h='<h2>Account</h2><p class="muted">Signed in as <b>'+esc(session.name)+'</b>. Your decks are encrypted with your password before they are saved.</p>'+
+    '<form class="pwform" data-form="pw">'+
+    '<label class="field"><span>Current password</span><input type="password" id="pwCur" autocomplete="current-password"></label>'+
+    '<label class="field"><span>New password</span><input type="password" id="pwNew" autocomplete="new-password"></label>'+
+    '<label class="field"><span>Repeat new password</span><input type="password" id="pwNew2" autocomplete="new-password"></label>'+
+    '<div class="row-btns"><button class="btn" type="submit">Change password</button></div></form>';
+  if(acctDel){
+    h+='<form class="confirmbar" data-form="delacct"><span>Delete this account and all its decks? Enter your password to confirm. This cannot be undone.</span>'+
+      '<label class="sr" for="delPw">Password</label><input type="password" id="delPw" autocomplete="current-password" placeholder="Password">'+
+      '<div class="row-btns"><button class="btn danger solid" type="submit">Delete account</button><button class="btn ghost" type="button" data-act="acctDelNo">Cancel</button></div></form>';
+  }else{
+    h+='<div class="row-btns"><button class="btn" type="button" data-act="logout">Log out</button><button class="btn danger" type="button" data-act="acctDelAsk">Delete account</button></div>';
+  }
+  el.innerHTML=h;
+}
+
+function boot(){
+  setAuthMode('login');
+  $('#authSubmit').disabled=true;
+  var dbP=(window.claude&&window.claude.use)?Promise.resolve(window.claude.use('db')).catch(function(){return null}):Promise.resolve(null);
+  dbP.then(function(d){
+    db=d||null;
+    return recall().catch(function(){return null});
+  }).then(function(r){
+    if(!r||!r.key)return null;
+    return readDoc(r.id,false).then(function(x){
+      if(!x.doc)return null;
+      return decryptState(r.key,x.doc).then(function(pl){
+        return {s:{id:r.id,name:(pl&&pl.name)||r.name,key:r.key,salt:x.doc.salt,iter:+x.doc.iter||ITER,doc:x.doc},st:normalizeState(pl.state),syncUp:x.syncUp,imported:false};
+      },function(){forget();return null});
+    });
+  }).catch(function(){return null}).then(function(res){
+    if(res){enterSession(res,true);return}
+    authReady=true;$('#authSubmit').disabled=false;
+    $('#authStatus').textContent=db?'Your account is saved to this page\'s private storage, so you can log in from any device.':'Shared storage is not available here, so your account is saved in this browser only.';
+    focusSoon($('#authUser'));
+  });
+}
+
+/* ---------- toast ---------- */
+var toastTimer=null;
+function toast(msg){
+  var el=$('#toast');el.textContent=msg;el.classList.add('on');
+  clearTimeout(toastTimer);toastTimer=setTimeout(function(){el.classList.remove('on')},2600);
+}
+
+/* ---------- card logic ---------- */
+function applyResult(c,ok,noPromote){
+  c.seen++;c.last=Date.now();
+  if(ok){c.ok++;if(!noPromote)c.lv=Math.min(3,Math.max(c.lv,1)+1)}
+  else{c.no++;c.lv=1}
+}
+function sideOf(card,dir){
+  var py=state.settings.showPinyin?card.p:'';
+  if(dir==='ft')return {p:card.d,a:card.t,pl:'Meaning',al:'Chinese',fsub:'',sub:card.p};
+  if(dir==='tp')return {p:card.t,a:card.p,pl:'Chinese',al:'Pinyin',fsub:'',sub:card.d};
+  return {p:card.t,a:card.d,pl:'Chinese',al:'Meaning',fsub:py,sub:card.p};
+}
+function usable(c,dir){return dir!=='tp'||!!c.p}
+function askLabel(dir){return dir==='ft'?'Your answer in Chinese characters':dir==='tp'?'Your answer in pinyin (tone marks or numbers, like ni3 hao3)':'Your answer: the meaning in English'}
+function numToMark(s){
+  var marks={a:'āáǎà',e:'ēéěè',i:'īíǐì',o:'ōóǒò',u:'ūúǔù','ü':'ǖǘǚǜ'};
+  return String(s).replace(/([a-züv:]+)([1-5])/gi,function(m,syl,t){
+    syl=syl.replace(/u:|v/gi,'ü');t=+t;if(t===5)return syl;
+    var l=syl.toLowerCase(),idx=-1,i;
+    if(l.indexOf('a')>-1)idx=l.indexOf('a');
+    else if(l.indexOf('e')>-1)idx=l.indexOf('e');
+    else if(l.indexOf('ou')>-1)idx=l.indexOf('ou');
+    else{for(i=l.length-1;i>=0;i--){if('iouü'.indexOf(l.charAt(i))>-1){idx=i;break}}}
+    if(idx<0)return syl;
+    return syl.slice(0,idx)+marks[l.charAt(idx)].charAt(t-1)+syl.slice(idx+1);
+  });
+}
+function pyNorm(s){return norm(numToMark(String(s))).replace(/ /g,'')}
+function pyFold(s){return pyNorm(s).normalize('NFD').replace(/[̀-ͯ]/g,'')}
+
+function norm(s){return String(s).toLowerCase().normalize('NFC').replace(/[.,!?¿¡;:"“”'’()\[\]，。！？；：、（）《》「」『』…·]/g,'').replace(/\s+/g,' ').trim()}
+function fold(s){return norm(s).normalize('NFD').replace(/[̀-ͯ]/g,'')}
+function judge(given,answer,py){
+  var g=String(given||'').trim();
+  if(!g)return {ok:false,close:false};
+  var opts=[answer].concat(String(answer).split(/[;；\/]/)).map(function(x){return x.trim()}).filter(Boolean);
+  var i;
+  var N=py?pyNorm:norm,F=py?pyFold:fold;
+  for(i=0;i<opts.length;i++){if(N(g)===N(opts[i]))return {ok:true,close:false}}
+  for(i=0;i<opts.length;i++){if(F(g)===F(opts[i]))return {ok:true,close:true}}
+  return {ok:false,close:false};
+}
+function parseBulk(text){
+  var good=[],skipped=0;
+  String(text).split(/\r?\n/).forEach(function(line){
+    var l=line.trim();if(!l)return;
+    var parts=null,seps=[/\t+/,/\s*[;；]\s*/,/\s*=\s*/,/\s+[-–—]\s+/];
+    for(var si=0;si<seps.length&&!parts;si++){var pp=l.split(seps[si]).map(function(x){return x.trim()}).filter(Boolean);if(pp.length>=2)parts=pp}
+    if(!parts)skipped++;
+    else if(parts.length>=3)good.push({t:parts[0],p:numToMark(parts[1]),d:parts.slice(2).join('; ')});
+    else good.push({t:parts[0],p:'',d:parts[1]});
+  });
+  return {good:good,skipped:skipped};
+}
+function newCard(t,d,p){return {id:uid(),t:t,p:p||'',d:d,lv:0,seen:0,ok:0,no:0,last:0}}
+
+/* ---------- rendering: header + progress ---------- */
+function renderDeckBar(){
+  var sel=$('#deckSelect');
+  sel.innerHTML=state.decks.map(function(d){return '<option value="'+esc(d.id)+'">'+esc(d.name)+'</option>'}).join('');
+  sel.value=state.activeId;
+}
+function renderProgress(){
+  var d=deck(),counts=[0,0,0,0];
+  d.cards.forEach(function(c){counts[c.lv]++});
+  var total=d.cards.length,pct=total?Math.round(counts[3]/total*100):0;
+  var segs=total?counts.map(function(n,i){return n?'<span class="seg-'+i+'" style="width:'+(n/total*100)+'%" title="'+LV[i]+': '+n+'"></span>':''}).join(''):'';
+  var last=d.tests.length?d.tests[d.tests.length-1]:null;
+  var lastTxt=last?'Last test '+last.score+'/'+last.total+' · '+Math.round(last.score/last.total*100)+'% · '+fmtDate(last.at):'No tests taken yet';
+  var label=LV.map(function(n,i){return n+' '+counts[i]}).join(', ');
+  $('#progress').innerHTML=
+    '<div class="prog-top"><div class="prog-main"><span class="prog-pct">'+pct+'%</span><span class="prog-cap">mastered · '+pl(total,'card')+'</span></div>'+
+    '<span class="prog-last">'+esc(lastTxt)+'</span></div>'+
+    '<div class="bar" role="img" aria-label="'+esc(label)+'">'+segs+'</div>'+
+    '<ul class="legend">'+LV.map(function(n,i){return '<li><span class="dot" style="--c:var(--lv'+i+')"></span>'+n+' <b>'+counts[i]+'</b></li>'}).join('')+'</ul>';
+}
+
+/* ---------- rendering: shared option selects ---------- */
+function dirSelect(id){
+  var v=state.settings.dir;
+  return '<label class="field"><span>Show first</span><select id="'+id+'" data-set="dir"><option value="tf"'+(v==='tf'?' selected':'')+'>Chinese, then meaning</option><option value="ft"'+(v==='ft'?' selected':'')+'>Meaning, then Chinese</option><option value="tp"'+(v==='tp'?' selected':'')+'>Chinese, then pinyin</option></select></label>';
+}
+function pyCheck(id){
+  return '<label class="check"><input type="checkbox" id="'+id+'" data-set="showPinyin"'+(state.settings.showPinyin?' checked':'')+'> Show pinyin as a hint when Chinese comes first</label>';
+}
+function emptyDeck(){
+  return '<div class="empty"><h2>This deck has no cards yet</h2><p class="lead">Add words one at a time or paste a whole list in the Cards tab.</p><button class="btn primary" type="button" data-act="toCards">Add cards</button></div>';
+}
+
+/* ---------- study ---------- */
+function renderStudy(){
+  var box=$('#studyBody'),d=deck(),s=state.settings;
+  if(study&&study.phase==='run')return renderStudyRun(box);
+  if(study&&study.phase==='done')return renderStudyDone(box);
+  if(!d.cards.length){box.innerHTML=emptyDeck();return}
+  var base=d.cards.filter(function(c){return usable(c,s.dir)});
+  var pool=base.filter(function(c){return s.inclMastered||c.lv<3});
+  var nOpts=[10,20,50,'all'].map(function(n){return '<option value="'+n+'"'+(String(s.studyN)===String(n)?' selected':'')+'>'+(n==='all'?'All cards':n+' cards')+'</option>'}).join('');
+  box.innerHTML=
+    '<div class="panel start"><h2>Study session</h2>'+
+    '<p class="lead">'+(pool.length?pl(pool.length,'card')+' ready to review. New and shaky cards come first.':!base.length?'No cards in this deck have pinyin yet. Add pinyin or switch the order.':'Every card in this deck is mastered. Include mastered cards to keep practising.')+'</p>'+
+    '<div class="opts-grid">'+dirSelect('studyDir')+
+    '<label class="field"><span>Session length</span><select id="studyN" data-set="studyN">'+nOpts+'</select></label></div>'+
+    pyCheck('studyPy')+
+    '<label class="check"><input type="checkbox" id="inclMastered" data-set="inclMastered"'+(s.inclMastered?' checked':'')+'> Include mastered cards</label>'+
+    '<div class="row-btns"><button class="btn primary big" type="button" data-act="startStudy"'+(pool.length?'':' disabled')+'>Start studying</button></div></div>';
+}
+function faceHTML(label,text,cls,sub){
+  return '<div class="face '+cls+'"><div class="face-head"><span class="eyebrow">'+label+'</span></div><div class="face-body '+lenClass(text)+'"><span'+(/[㐀-鿿]/.test(text)?' lang="zh-Hans"':'')+'>'+esc(text)+'</span>'+(sub?'<span class="face-sub">'+esc(sub)+'</span>':'')+'</div></div>';
+}
+function studyActionsHTML(){
+  if(!study.flipped)return '<button class="btn primary big only" type="button" data-act="flip">Show answer</button>';
+  return '<button class="btn again big" type="button" data-act="again">Again</button><button class="btn primary big" type="button" data-act="good">Got it</button>';
+}
+function renderStudyRun(box){
+  var c=cardById(study.queue[0]);
+  if(!c){study.phase='done';return renderStudyDone(box)}
+  var sd=sideOf(c,state.settings.dir);
+  var left=new Set(study.queue).size,pos=study.total-left+1;
+  var pct=Math.round((study.total-left)/study.total*100);
+  box.innerHTML=
+    '<div class="session-head"><span>Card '+pos+' of '+study.total+'</span><button class="btn ghost small" type="button" data-act="endStudy">End session</button></div>'+
+    '<div class="minibar" aria-hidden="true"><span style="width:'+pct+'%"></span></div>'+
+    '<div class="flip'+(study.flipped?' flipped':'')+'" id="flipCard" role="button" tabindex="0" aria-label="Flip card" data-act="flip"><div class="flip-inner">'+
+      faceHTML(sd.pl,sd.p,'front',sd.fsub)+faceHTML(sd.al,sd.a,'back',sd.sub)+
+    '</div></div>'+
+    '<div class="actions" id="studyActions"></div>'+
+    '<p class="hint"><kbd>Space</kbd> flip · <kbd>1</kbd> again · <kbd>2</kbd> got it</p>';
+  syncStudyFlip();
+  focusSoon($('#flipCard'));
+}
+function syncStudyFlip(){
+  var el=$('#flipCard');if(!el)return;
+  el.classList.toggle('flipped',study.flipped);
+  var f=$('.face.front',el),b=$('.face.back',el);
+  if(f)f.setAttribute('aria-hidden',study.flipped?'true':'false');
+  if(b)b.setAttribute('aria-hidden',study.flipped?'false':'true');
+  $('#studyActions').innerHTML=studyActionsHTML();
+}
+function renderStudyDone(box){
+  var d=deck(),m=d.cards.filter(function(c){return c.lv===3}).length;
+  box.innerHTML=
+    '<div class="panel results"><h2>Session complete</h2>'+
+    '<p><span class="score">'+study.right+'<small> got it</small></span></p>'+
+    '<p class="lead">'+pl(study.again,'card')+' marked Again. '+m+' of '+d.cards.length+' cards are mastered.</p>'+
+    '<div class="row-btns"><button class="btn primary" type="button" data-act="studyAgain">Study again</button>'+
+    '<button class="btn" type="button" data-act="toTest">Take a test</button>'+
+    '<button class="btn ghost" type="button" data-act="studyHome">Back</button></div></div>';
+}
+function startStudy(){
+  var d=deck(),s=state.settings;
+  var pool=d.cards.filter(function(c){return (s.inclMastered||c.lv<3)&&usable(c,s.dir)});
+  pool=shuffle(pool.slice()).sort(function(a,b){return a.lv-b.lv});
+  if(s.studyN!=='all')pool=pool.slice(0,+s.studyN);
+  if(!pool.length)return;
+  study={phase:'run',queue:pool.map(function(c){return c.id}),total:pool.length,flipped:false,right:0,again:0,requeued:{}};
+  renderStudy();
+}
+function flipStudy(){
+  if(!study||study.phase!=='run')return;
+  study.flipped=!study.flipped;syncStudyFlip();
+}
+function answerStudy(ok){
+  if(!study||study.phase!=='run'||!study.flipped)return;
+  var id=study.queue.shift(),c=cardById(id);
+  if(c){applyResult(c,ok,!!study.requeued[id])}
+  if(ok)study.right++;
+  else{
+    study.again++;
+    if(!study.requeued[id]){study.requeued[id]=1;study.queue.splice(Math.min(3,study.queue.length),0,id)}
+  }
+  study.flipped=false;
+  if(!study.queue.length)study.phase='done';
+  persist();renderProgress();renderStudy();
+}
+
+/* ---------- test ---------- */
+function prepQuestion(){
+  var d=deck(),id=test.items[test.i],c=cardById(id);
+  var cur={id:id,checked:false,correct:null,close:false,given:'',picked:null,options:null};
+  if(test.mode==='mc'){
+    var ans=sideOf(c,test.dir).a,seen={},opts=[];
+    seen[norm(ans)]=1;
+    shuffle(d.cards.filter(function(x){return x.id!==c.id&&usable(x,test.dir)}).slice()).forEach(function(x){
+      var a=sideOf(x,test.dir).a,k=norm(a);
+      if(opts.length<3&&!seen[k]){seen[k]=1;opts.push({id:x.id,text:a})}
+    });
+    opts.push({id:c.id,text:ans});
+    cur.options=shuffle(opts);
+  }
+  test.cur=cur;
+}
+function startTest(ids){
+  var d=deck(),s=state.settings,cards;
+  if(ids){cards=ids.map(cardById).filter(Boolean)}
+  else{cards=shuffle(d.cards.filter(function(c){return usable(c,s.dir)}));if(s.testN!=='all')cards=cards.slice(0,+s.testN)}
+  if(!cards.length){toast('No cards have pinyin yet. Add pinyin or pick another order.');return}
+  var mode=s.testMode;
+  if(mode==='mc'&&d.cards.length<2){mode='type';toast('Multiple choice needs at least 2 cards. Using typed answers.')}
+  test={phase:'ask',items:cards.map(function(c){return c.id}),i:0,mode:mode,dir:s.dir,results:[],cur:null};
+  prepQuestion();renderTest();
+}
+function renderTest(){
+  var box=$('#testBody'),d=deck(),s=state.settings;
+  if(test&&test.phase==='ask')return renderTestAsk(box);
+  if(test&&test.phase==='results')return renderTestResults(box);
+  if(!d.cards.length){box.innerHTML=emptyDeck();return}
+  var nOpts=[5,10,20,'all'].map(function(n){return '<option value="'+n+'"'+(String(s.testN)===String(n)?' selected':'')+'>'+(n==='all'?'All '+d.cards.length+' cards':n+' questions')+'</option>'}).join('');
+  var recent=d.tests.slice(-5).reverse().map(function(t){return '<li>'+esc(fmtDate(t.at))+' · '+t.score+'/'+t.total+' · '+Math.round(t.score/t.total*100)+'% · '+(t.mode==='mc'?'multiple choice':'typed')+'</li>'}).join('');
+  box.innerHTML=
+    '<div class="panel start"><h2>Test yourself</h2>'+
+    '<p class="lead">Answer without peeking. Right answers move a card up a level, wrong ones send it back to Learning.</p>'+
+    '<div class="opts-grid">'+dirSelect('testDir')+
+    '<label class="field"><span>Questions</span><select id="testN" data-set="testN">'+nOpts+'</select></label>'+
+    '<label class="field"><span>Format</span><select id="testMode" data-set="testMode"><option value="type"'+(s.testMode==='type'?' selected':'')+'>Type the answer</option><option value="mc"'+(s.testMode==='mc'?' selected':'')+'>Multiple choice</option></select></label></div>'+
+    pyCheck('testPy')+
+    '<div class="row-btns"><button class="btn primary big" type="button" data-act="startTest">Start test</button></div></div>'+
+    (recent?'<div class="recent"><h3>Recent tests</h3><ul>'+recent+'</ul></div>':'');
+}
+function renderTestAsk(box){
+  var c=cardById(test.cur.id),cur=test.cur;
+  if(!c){test.i++;if(test.i>=test.items.length)return finishTest();prepQuestion();return renderTestAsk(box)}
+  var sd=sideOf(c,test.dir),n=test.items.length,pct=Math.round(test.i/n*100);
+  var html=
+    '<div class="session-head"><span>Question '+(test.i+1)+' of '+n+'</span><button class="btn ghost small" type="button" data-act="quitTest">Quit test</button></div>'+
+    '<div class="minibar" aria-hidden="true"><span style="width:'+pct+'%"></span></div>'+
+    faceHTML(sd.pl,sd.p,'solo',sd.fsub);
+  if(test.mode==='type'){
+    html+='<form class="answer-form" id="answerForm"><label class="label" for="answerInput">'+askLabel(test.dir)+'</label>'+
+      '<input type="text" class="answer-input" id="answerInput" autocomplete="off" autocapitalize="off" spellcheck="false" value="'+esc(cur.given)+'"'+(cur.checked?' readonly':'')+'>';
+    if(!cur.checked)html+='<div class="row-btns"><button class="btn primary" type="submit">Check</button><button class="btn ghost" type="button" data-act="dontKnow">I don\'t know</button></div>';
+    html+='</form>';
+  }else{
+    html+='<div class="opts" id="opts">'+cur.options.map(function(o,i){
+      var cls='opt';
+      if(cur.checked){if(o.id===c.id)cls+=' right';else if(cur.picked===i)cls+=' wrong'}
+      return '<button type="button" class="'+cls+'" data-act="pick" data-i="'+i+'"'+(cur.checked?' disabled':'')+'><span class="k">'+(i+1)+'</span><span>'+esc(o.text)+'</span></button>';
+    }).join('')+'</div>';
+  }
+  if(cur.checked){
+    var title=cur.correct?(cur.close?(test.dir==='tp'?'Correct, check the tones':'Correct, check the accents'):'Correct'):'Not quite';
+    html+='<div class="feedback '+(cur.correct?'ok':'bad')+'"><span class="fb-title">'+title+'</span>'+
+      '<span>Answer: <span class="ans">'+esc(sd.a)+'</span></span>'+(sd.sub?'<span class="muted">'+esc(sd.sub)+'</span>':'')+
+      (!cur.correct&&cur.given?'<span class="muted">You wrote: '+esc(cur.given)+'</span>':'')+
+      (!cur.correct&&test.mode==='type'?'<div class="row-btns"><button class="btn small" type="button" data-act="override">Count as correct</button></div>':'')+
+      '</div>'+
+      '<div class="row-btns"><button class="btn primary big" type="button" id="nextQ" data-act="next">'+(test.i+1>=n?'See results':'Next question')+'</button></div>';
+  }
+  box.innerHTML=html;
+  if(cur.checked)focusSoon($('#nextQ'));
+  else if(test.mode==='type')focusSoon($('#answerInput'));
+}
+function checkTyped(skip){
+  var cur=test.cur;if(cur.checked)return;
+  var c=cardById(cur.id),inp=$('#answerInput');
+  var given=skip?'':(inp?inp.value:'');
+  if(!skip&&!given.trim()){toast('Type an answer, or choose I don\'t know.');return}
+  var r=judge(given,sideOf(c,test.dir).a,test.dir==='tp');
+  cur.checked=true;cur.given=given.trim();cur.correct=r.ok;cur.close=r.close;
+  renderTestAsk($('#testBody'));
+}
+function pickOption(i){
+  var cur=test.cur;if(cur.checked||!cur.options||!cur.options[i])return;
+  cur.checked=true;cur.picked=i;cur.given=cur.options[i].text;cur.correct=cur.options[i].id===cur.id;
+  renderTestAsk($('#testBody'));
+}
+function nextQuestion(){
+  var cur=test.cur;if(!cur||!cur.checked)return;
+  var c=cardById(cur.id);
+  if(c)applyResult(c,cur.correct,false);
+  test.results.push({id:cur.id,given:cur.given,correct:!!cur.correct});
+  test.i++;
+  if(test.i>=test.items.length){finishTest()}
+  else{prepQuestion();persist();renderProgress();renderTest();return}
+  persist();renderProgress();
+}
+function finishTest(){
+  var d=deck(),score=test.results.filter(function(r){return r.correct}).length;
+  d.tests.push({at:Date.now(),score:score,total:test.results.length,mode:test.mode,dir:test.dir});
+  d.tests=d.tests.slice(-20);
+  test.phase='results';test.score=score;
+  persist();renderProgress();renderTest();
+}
+function renderTestResults(box){
+  var n=test.results.length,pct=n?Math.round(test.score/n*100):0;
+  var missed=test.results.filter(function(r){return !r.correct});
+  var msg=pct===100?'Perfect score.':pct>=80?'Strong result.':pct>=50?'Getting there. The missed cards are back in Learning.':'Keep going. The missed cards are back in Learning.';
+  box.innerHTML=
+    '<div class="panel results"><h2>Test finished</h2>'+
+    '<p><span class="score">'+test.score+'<small> / '+n+' · '+pct+'%</small></span></p><p class="lead">'+msg+'</p>'+
+    (missed.length?'<ul class="missed">'+missed.map(function(r){
+      var c=cardById(r.id);if(!c)return '';var sd=sideOf(c,test.dir);
+      return '<li><span class="p">'+esc(sd.p)+'</span><span>'+esc(sd.a)+'</span>'+(r.given?'<span class="g">You wrote: '+esc(r.given)+'</span>':'')+'</li>';
+    }).join('')+'</ul>':'')+
+    '<div class="row-btns">'+(missed.length?'<button class="btn primary" type="button" data-act="retryMissed">Retry '+missed.length+' missed</button>':'')+
+    '<button class="btn'+(missed.length?'':' primary')+'" type="button" data-act="testHome">Done</button></div></div>';
+}
+
+/* ---------- cards tab ---------- */
+function renderCards(){
+  var d=deck();
+  $('#sampleNote').innerHTML=d.sample?'<p class="note">This is an example deck so you can try Nola. Delete it under Deck settings below when you are ready for your own words.</p>':'';
+  $('#listTitle').textContent=pl(d.cards.length,'card');
+  renderCardList();renderAdmin();renderAcctAdmin();
+}
+function rowHTML(c){
+  if(editing===c.id){
+    return '<li class="row editing"><form data-form="edit" data-id="'+c.id+'">'+
+      '<label class="field"><span>Chinese</span><input type="text" id="editT" lang="zh-Hans" value="'+esc(c.t)+'" autocomplete="off"></label>'+
+      '<label class="field"><span>Pinyin</span><input type="text" id="editP" value="'+esc(c.p||'')+'" autocomplete="off"></label>'+
+      '<label class="field"><span>Meaning</span><input type="text" id="editD" value="'+esc(c.d)+'" autocomplete="off"></label>'+
+      '<div class="row-btns"><button class="btn primary small" type="submit">Save</button><button class="btn ghost small" type="button" data-act="cancelEdit">Cancel</button></div></form></li>';
+  }
+  if(confirmCard===c.id){
+    return '<li class="row confirm"><span>Delete “'+esc(c.t)+'”?</span><span class="row-actions"><button class="btn danger solid small" type="button" data-act="delCardYes" data-id="'+c.id+'">Delete</button><button class="btn ghost small" type="button" data-act="delCardNo">Keep</button></span></li>';
+  }
+  return '<li class="row"><span class="cell-t"><span lang="zh-Hans">'+esc(c.t)+'</span>'+(c.p?'<span class="py">'+esc(c.p)+'</span>':'')+'</span><span class="cell-d">'+esc(c.d)+'</span>'+
+    '<span class="pill" data-lv="'+c.lv+'">'+LV[c.lv]+'</span>'+
+    '<span class="row-actions"><button class="btn ghost small" type="button" data-act="editCard" data-id="'+c.id+'" aria-label="Edit '+esc(c.t)+'">Edit</button><button class="btn ghost small" type="button" data-act="delCard" data-id="'+c.id+'" aria-label="Delete '+esc(c.t)+'">Delete</button></span></li>';
+}
+function renderCardList(){
+  var d=deck(),q=cardFilter.trim().toLowerCase();
+  var list=d.cards.slice().reverse().filter(function(c){return !q||c.t.toLowerCase().indexOf(q)>-1||(c.p||'').toLowerCase().indexOf(q)>-1||c.d.toLowerCase().indexOf(q)>-1});
+  var MAX=300,shown=list.slice(0,MAX);
+  var html=shown.map(rowHTML).join('');
+  if(!d.cards.length)html='<li class="more">No cards yet. Add your first word above.</li>';
+  else if(!list.length)html='<li class="more">No cards match “'+esc(cardFilter)+'”.</li>';
+  if(list.length>MAX)html+='<li class="more">Showing the newest '+MAX+' of '+list.length+'. Use search to find the rest.</li>';
+  $('#cardList').innerHTML=html;
+  if(editing)focusSoon($('#editT'));
+}
+function renderAdmin(){
+  var d=deck(),html='<h2>Deck settings</h2>'+
+    '<form class="rename" data-form="rename"><label class="sr" for="renameInput">Deck name</label><input type="text" id="renameInput" value="'+esc(d.name)+'" maxlength="60" autocomplete="off"><button class="btn" type="submit">Rename</button></form>';
+  if(confirmAdmin==='reset'){
+    html+='<div class="confirmbar"><span>Reset progress for all '+pl(d.cards.length,'card')+' and clear the test history? Your cards stay.</span><div class="row-btns"><button class="btn danger solid" type="button" data-act="resetYes">Reset progress</button><button class="btn ghost" type="button" data-act="adminNo">Cancel</button></div></div>';
+  }else if(confirmAdmin==='delete'){
+    html+='<div class="confirmbar"><span>Delete “'+esc(d.name)+'” and its '+pl(d.cards.length,'card')+'? This cannot be undone.</span><div class="row-btns"><button class="btn danger solid" type="button" data-act="deleteYes">Delete deck</button><button class="btn ghost" type="button" data-act="adminNo">Cancel</button></div></div>';
+  }else{
+    html+='<div class="row-btns"><button class="btn" type="button" data-act="resetAsk">Reset progress</button><button class="btn danger" type="button" data-act="deleteAsk">Delete deck</button></div>';
+  }
+  $('#deckAdmin').innerHTML=html;
+}
+
+function renderAll(){renderDeckBar();renderProgress();renderStudy();renderTest();renderCards()}
+
+function setTab(name){
+  tab=name;
+  $$('.tab').forEach(function(b){b.setAttribute('aria-selected',b.dataset.tab===name?'true':'false')});
+  ['study','test','cards'].forEach(function(n){$('#view-'+n).hidden=n!==name});
+}
+
+/* ---------- actions ---------- */
+var A={
+  authLogin:function(){setAuthMode('login')},
+  authSignup:function(){setAuthMode('signup')},
+  logout:logOut,
+  acctDelAsk:function(){acctDel=true;renderAcctAdmin();focusSoon($('#delPw'))},
+  acctDelNo:function(){acctDel=false;renderAcctAdmin()},
+  newDeck:function(){var f=$('#newDeckForm');f.hidden=false;focusSoon($('#newDeckName'))},
+  cancelNewDeck:function(){$('#newDeckForm').hidden=true;$('#newDeckName').value=''},
+  toCards:function(){setTab('cards');focusSoon($('#addTerm'))},
+  toTest:function(){study=null;setTab('test');renderStudy()},
+  startStudy:startStudy,
+  flip:flipStudy,
+  showAnswer:flipStudy,
+  again:function(){answerStudy(false)},
+  good:function(){answerStudy(true)},
+  endStudy:function(){study=null;renderStudy();renderProgress()},
+  studyAgain:function(){study=null;startStudy()},
+  studyHome:function(){study=null;renderStudy()},
+  startTest:function(){startTest()},
+  quitTest:function(){test=null;renderTest()},
+  dontKnow:function(){checkTyped(true)},
+  override:function(){if(test&&test.cur&&test.cur.checked){test.cur.correct=true;test.cur.close=false;renderTestAsk($('#testBody'))}},
+  next:nextQuestion,
+  pick:function(el){pickOption(+el.dataset.i)},
+  retryMissed:function(){var ids=test.results.filter(function(r){return !r.correct}).map(function(r){return r.id});startTest(ids)},
+  testHome:function(){test=null;renderTest()},
+  editCard:function(el){editing=el.dataset.id;confirmCard=null;renderCardList()},
+  cancelEdit:function(){editing=null;renderCardList()},
+  delCard:function(el){confirmCard=el.dataset.id;editing=null;renderCardList()},
+  delCardNo:function(){confirmCard=null;renderCardList()},
+  delCardYes:function(el){
+    var d=deck();d.cards=d.cards.filter(function(c){return c.id!==el.dataset.id});
+    confirmCard=null;persist();renderAll();toast('Card deleted');
+  },
+  importBulk:function(){
+    var r=parseBulk($('#bulkText').value),d=deck(),have={};
+    d.cards.forEach(function(c){have[norm(c.t)+'|'+norm(c.d)]=1});
+    var added=0,dupes=0;
+    r.good.forEach(function(g){var k=norm(g.t)+'|'+norm(g.d);if(have[k]){dupes++;return}have[k]=1;d.cards.push(newCard(g.t,g.d,g.p));added++});
+    $('#bulkText').value='';updateBulkPreview();
+    persist();renderAll();
+    toast('Added '+pl(added,'card')+(dupes?', skipped '+dupes+' duplicate'+(dupes===1?'':'s'):'')+(r.skipped?', '+pl(r.skipped,'line')+' had no separator':''));
+  },
+  resetAsk:function(){confirmAdmin='reset';renderAdmin()},
+  deleteAsk:function(){confirmAdmin='delete';renderAdmin()},
+  adminNo:function(){confirmAdmin=null;renderAdmin()},
+  resetYes:function(){
+    var d=deck();d.cards.forEach(function(c){c.lv=0;c.seen=0;c.ok=0;c.no=0;c.last=0});d.tests=[];
+    confirmAdmin=null;resetSessions();persist();renderAll();toast('Progress reset');
+  },
+  deleteYes:function(){
+    state.decks=state.decks.filter(function(x){return x.id!==state.activeId});
+    if(!state.decks.length)state.decks.push({id:uid(),name:'My words',cards:[],tests:[]});
+    state.activeId=state.decks[0].id;
+    resetSessions();persist();renderAll();toast('Deck deleted');
+  }
+};
+
+function updateBulkPreview(){
+  var r=parseBulk($('#bulkText').value);
+  var el=$('#bulkPreview'),btn=$('#bulkBtn');
+  if(!$('#bulkText').value.trim()){el.textContent='Nothing to import yet.';btn.disabled=true;btn.textContent='Add cards';return}
+  el.textContent=pl(r.good.length,'card')+' ready'+(r.skipped?' · '+pl(r.skipped,'line')+' skipped (no separator)':'');
+  btn.disabled=!r.good.length;btn.textContent=r.good.length?'Add '+pl(r.good.length,'card'):'Add cards';
+}
+
+document.addEventListener('click',function(e){
+  var t=e.target.closest('[data-tab]');
+  if(t){setTab(t.dataset.tab);return}
+  var el=e.target.closest('[data-act]');
+  if(!el)return;
+  var fn=A[el.dataset.act];
+  if(fn)fn(el,e);
+});
+
+document.addEventListener('change',function(e){
+  var el=e.target;
+  if(el.id==='deckSelect'){state.activeId=el.value;resetSessions();cardFilter='';$('#cardSearch').value='';persist();renderAll();return}
+  var k=el.dataset&&el.dataset.set;
+  if(!k)return;
+  var s=state.settings;
+  if(k==='inclMastered'||k==='showPinyin')s[k]=el.checked;
+  else if(k==='studyN'||k==='testN')s[k]=el.value==='all'?'all':+el.value;
+  else s[k]=el.value;
+  persist();renderStudy();renderTest();
+});
+
+document.addEventListener('submit',function(e){
+  e.preventDefault();
+  var f=e.target,id=f.id,kind=f.dataset.form;
+  if(id==='authForm'){authSubmit();return}
+  if(kind==='pw'){changePassword();return}
+  if(kind==='delacct'){deleteAccount();return}
+  if(id==='newDeckForm'){
+    var name=$('#newDeckName').value.trim()||'Untitled deck';
+    var d={id:uid(),name:name,cards:[],tests:[]};
+    state.decks.push(d);state.activeId=d.id;resetSessions();
+    $('#newDeckName').value='';f.hidden=true;
+    persist();renderAll();setTab('cards');focusSoon($('#addTerm'));
+  }else if(id==='addForm'){
+    var t=$('#addTerm').value.trim(),df=$('#addDef').value.trim(),pn=numToMark($('#addPy').value.trim());
+    if(!t||!df){toast('Fill in the Chinese and the meaning.');focusSoon(!t?$('#addTerm'):$('#addDef'));return}
+    deck().cards.push(newCard(t,df,pn));
+    $('#addTerm').value='';$('#addPy').value='';$('#addDef').value='';
+    persist();renderAll();toast('Added “'+t+'”');focusSoon($('#addTerm'));
+  }else if(id==='answerForm'){
+    checkTyped(false);
+  }else if(kind==='edit'){
+    var c=cardById(f.dataset.id),nt=$('#editT').value.trim(),nd=$('#editD').value.trim(),np=numToMark($('#editP').value.trim());
+    if(!nt||!nd){toast('Both fields need text.');return}
+    if(c){c.t=nt;c.d=nd;c.p=np}
+    editing=null;persist();renderAll();
+  }else if(kind==='rename'){
+    var nn=$('#renameInput').value.trim();
+    if(!nn){toast('A deck needs a name.');return}
+    deck().name=nn;persist();renderDeckBar();renderAdmin();toast('Deck renamed');
+  }
+});
+
+document.addEventListener('input',function(e){
+  if(e.target.id==='bulkText')updateBulkPreview();
+  else if(e.target.id==='cardSearch'){cardFilter=e.target.value;renderCardList()}
+});
+
+document.addEventListener('keydown',function(e){
+  if(e.metaKey||e.ctrlKey||e.altKey)return;
+  var t=e.target,tag=t&&t.tagName;
+  var typing=tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT';
+  if(typing)return;
+  if(tab==='study'&&study&&study.phase==='run'){
+    if((e.key===' '||e.key==='Enter')&&tag==='BUTTON')return;
+    if(e.key===' '||e.key==='Enter'){
+      e.preventDefault();
+      if(t&&t.id==='flipCard'&&e.repeat)return;
+      if(!study.flipped)flipStudy();
+      return;
+    }
+    if(study.flipped){
+      if(e.key==='1'||e.key==='ArrowLeft'){e.preventDefault();answerStudy(false)}
+      else if(e.key==='2'||e.key==='ArrowRight'){e.preventDefault();answerStudy(true)}
+    }
+  }else if(tab==='test'&&test&&test.phase==='ask'){
+    var cur=test.cur;
+    if(test.mode==='mc'&&!cur.checked&&/^[1-9]$/.test(e.key)){e.preventDefault();pickOption(+e.key-1);return}
+    if(cur.checked&&e.key==='Enter'&&tag!=='BUTTON'){e.preventDefault();nextQuestion()}
+  }
+});
+
+/* ---------- boot ---------- */
+boot();
+})();
+</script>
+
+</body></html>
